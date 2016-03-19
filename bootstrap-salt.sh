@@ -1916,7 +1916,7 @@ __install_pip_deps() {
     __PIP_PACKAGES=''
     if [ "$_INSTALL_CLOUD" -eq $BS_TRUE ]; then
         # shellcheck disable=SC2089
-        __PIP_PACKAGES="${__PIP_PACKAGES} 'apache-libcloud>=$_LIBCLOUD_MIN_VERSION'"
+        __PIP_PACKAGES="${__PIP_PACKAGES} apache-libcloud>=$_LIBCLOUD_MIN_VERSION"
     fi
 
     # shellcheck disable=SC2086,SC2090
@@ -2301,6 +2301,12 @@ install_ubuntu_git_post() {
         [ $fname = "master" ] && [ "$_INSTALL_MASTER" -eq $BS_FALSE ] && continue
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
+
+        # Install symlinks to Salt binaries
+        for bin_path in ${_VIRTUALENV_DIR}/bin/salt*; do
+            __linkfile "$bin_path" "/usr/bin/${bin_path##*/}"
+        done
+        __linkfile ${_VIRTUALENV_DIR}/bin/spm /usr/bin/spm
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
