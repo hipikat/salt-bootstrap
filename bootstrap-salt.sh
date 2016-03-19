@@ -2302,11 +2302,13 @@ install_ubuntu_git_post() {
         [ $fname = "api" ] && ([ "$_INSTALL_MASTER" -eq $BS_FALSE ] || ! __check_command_exists "salt-${fname}") && continue
         [ $fname = "syndic" ] && [ "$_INSTALL_SYNDIC" -eq $BS_FALSE ] && continue
 
-        # Install symlinks to Salt binaries
-        for bin_path in ${_VIRTUALENV_DIR}/bin/salt*; do
-            __linkfile "$bin_path" "/usr/bin/${bin_path##*/}"
-        done
-        __linkfile ${_VIRTUALENV_DIR}/bin/spm /usr/bin/spm
+        if [ "$_VIRTUALENV_DIR" != "null" ]; then
+            # Install symlinks to Salt binaries
+            for bin_path in ${_VIRTUALENV_DIR}/bin/salt*; do
+                __linkfile "$bin_path" "/usr/bin/${bin_path##*/}"
+            done
+            __linkfile ${_VIRTUALENV_DIR}/bin/spm /usr/bin/spm
+        fi
 
         if [ -f /bin/systemctl ] && [ "$DISTRO_MAJOR_VERSION" -ge 15 ]; then
             __copyfile "${_SALT_GIT_CHECKOUT_DIR}/pkg/rpm/salt-${fname}.service" "/lib/systemd/system/salt-${fname}.service"
